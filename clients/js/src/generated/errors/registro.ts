@@ -19,13 +19,30 @@ import { REGISTRO_PROGRAM_ADDRESS } from "../programs";
 export const REGISTRO_ERROR__NO_OWNER = 0x1770; // 6000
 /** NoSKU: Error, la venta no esta en el historial del cliente */
 export const REGISTRO_ERROR__NO_S_K_U = 0x1771; // 6001
+/** ClienteConVentasActivas: Error, no se puede dar de baja a un cliente con ventas activas */
+export const REGISTRO_ERROR__CLIENTE_CON_VENTAS_ACTIVAS = 0x1772; // 6002
+/** MontoInvalido: Error, el monto debe ser mayor a cero */
+export const REGISTRO_ERROR__MONTO_INVALIDO = 0x1773; // 6003
+/** MontoSinCambios: Error, el nuevo monto es igual al monto actual */
+export const REGISTRO_ERROR__MONTO_SIN_CAMBIOS = 0x1774; // 6004
+/** CampoVacio: Error, los campos de texto no pueden estar vacios */
+export const REGISTRO_ERROR__CAMPO_VACIO = 0x1775; // 6005
 
 export type RegistroError =
-  typeof REGISTRO_ERROR__NO_OWNER | typeof REGISTRO_ERROR__NO_S_K_U;
+  | typeof REGISTRO_ERROR__CAMPO_VACIO
+  | typeof REGISTRO_ERROR__CLIENTE_CON_VENTAS_ACTIVAS
+  | typeof REGISTRO_ERROR__MONTO_INVALIDO
+  | typeof REGISTRO_ERROR__MONTO_SIN_CAMBIOS
+  | typeof REGISTRO_ERROR__NO_OWNER
+  | typeof REGISTRO_ERROR__NO_S_K_U;
 
 let registroErrorMessages: Record<RegistroError, string> | undefined;
 if (process.env["NODE_ENV"] !== "production") {
   registroErrorMessages = {
+    [REGISTRO_ERROR__CAMPO_VACIO]: `Error, los campos de texto no pueden estar vacios`,
+    [REGISTRO_ERROR__CLIENTE_CON_VENTAS_ACTIVAS]: `Error, no se puede dar de baja a un cliente con ventas activas`,
+    [REGISTRO_ERROR__MONTO_INVALIDO]: `Error, el monto debe ser mayor a cero`,
+    [REGISTRO_ERROR__MONTO_SIN_CAMBIOS]: `Error, el nuevo monto es igual al monto actual`,
     [REGISTRO_ERROR__NO_OWNER]: `Error, no eres el owner del registro`,
     [REGISTRO_ERROR__NO_S_K_U]: `Error, la venta no esta en el historial del cliente`,
   };
