@@ -9,5 +9,6 @@
 export * from "./cambiarMonto";
 export * from "./crearCliente";
 export * from "./crearRegistro";
+export * from "./darBajaCliente";
 export * from "./hacerDevolucion";
 export * from "./registrarVenta";

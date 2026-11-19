@@ -49,27 +49,31 @@ import {
   getCambiarMontoInstruction,
   getCrearClienteInstruction,
   getCrearRegistroInstruction,
+  getDarBajaClienteInstruction,
   getHacerDevolucionInstruction,
   getRegistrarVentaInstruction,
   parseCambiarMontoInstruction,
   parseCrearClienteInstruction,
   parseCrearRegistroInstruction,
+  parseDarBajaClienteInstruction,
   parseHacerDevolucionInstruction,
   parseRegistrarVentaInstruction,
   type CambiarMontoInput,
   type CrearClienteInput,
   type CrearRegistroInput,
+  type DarBajaClienteInput,
   type HacerDevolucionInput,
   type ParsedCambiarMontoInstruction,
   type ParsedCrearClienteInstruction,
   type ParsedCrearRegistroInstruction,
+  type ParsedDarBajaClienteInstruction,
   type ParsedHacerDevolucionInstruction,
   type ParsedRegistrarVentaInstruction,
   type RegistrarVentaInput,
 } from "../instructions";
 
 export const REGISTRO_PROGRAM_ADDRESS =
-  "38oTMyvUTmqkBQeMiuok5F2mPjp9dVadWdBeQTDNmTUY" as Address<"38oTMyvUTmqkBQeMiuok5F2mPjp9dVadWdBeQTDNmTUY">;
+  "E6aT8XpxPyqKtttRxjhgoVoaGX4icqbzDxbNic9BuwNo" as Address<"E6aT8XpxPyqKtttRxjhgoVoaGX4icqbzDxbNic9BuwNo">;
 
 export enum RegistroAccount {
   Registro,
@@ -123,6 +127,7 @@ export function identifyRegistroAccount(
 export enum RegistroInstruction {
   CrearRegistro,
   CrearCliente,
+  DarBajaCliente,
   RegistrarVenta,
   HacerDevolucion,
   CambiarMonto,
@@ -153,6 +158,17 @@ export function identifyRegistroInstruction(
     )
   ) {
     return RegistroInstruction.CrearCliente;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([108, 151, 48, 69, 85, 63, 36, 120]),
+      ),
+      0,
+    )
+  ) {
+    return RegistroInstruction.DarBajaCliente;
   }
   if (
     containsBytes(
@@ -194,7 +210,7 @@ export function identifyRegistroInstruction(
 }
 
 export type ParsedRegistroInstruction<
-  TProgram extends string = "38oTMyvUTmqkBQeMiuok5F2mPjp9dVadWdBeQTDNmTUY",
+  TProgram extends string = "E6aT8XpxPyqKtttRxjhgoVoaGX4icqbzDxbNic9BuwNo",
 > =
   | ({
       instructionType: RegistroInstruction.CrearRegistro;
@@ -202,6 +218,9 @@ export type ParsedRegistroInstruction<
   | ({
       instructionType: RegistroInstruction.CrearCliente;
     } & ParsedCrearClienteInstruction<TProgram>)
+  | ({
+      instructionType: RegistroInstruction.DarBajaCliente;
+    } & ParsedDarBajaClienteInstruction<TProgram>)
   | ({
       instructionType: RegistroInstruction.RegistrarVenta;
     } & ParsedRegistrarVentaInstruction<TProgram>)
@@ -229,6 +248,13 @@ export function parseRegistroInstruction<TProgram extends string>(
       return {
         instructionType: RegistroInstruction.CrearCliente,
         ...parseCrearClienteInstruction(instruction),
+      };
+    }
+    case RegistroInstruction.DarBajaCliente: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: RegistroInstruction.DarBajaCliente,
+        ...parseDarBajaClienteInstruction(instruction),
       };
     }
     case RegistroInstruction.RegistrarVenta: {
@@ -287,6 +313,11 @@ export type RegistroPluginInstructions = {
     input: CrearClienteInput,
     config?: { programAddress?: Address | HasAddress },
   ) => ReturnType<typeof getCrearClienteInstruction> & SelfPlanAndSendFunctions;
+  darBajaCliente: (
+    input: DarBajaClienteInput,
+    config?: { programAddress?: Address | HasAddress },
+  ) => ReturnType<typeof getDarBajaClienteInstruction> &
+    SelfPlanAndSendFunctions;
   registrarVenta: (
     input: RegistrarVentaInput,
     config?: { programAddress?: Address | HasAddress },
@@ -335,6 +366,14 @@ export function registroProgram(
             addSelfPlanAndSendFunctions(
               client,
               getCrearClienteInstruction(input, {
+                programAddress:
+                  instructionConfig?.programAddress ?? config.programAddress,
+              }),
+            ),
+          darBajaCliente: (input, instructionConfig) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getDarBajaClienteInstruction(input, {
                 programAddress:
                   instructionConfig?.programAddress ?? config.programAddress,
               }),
