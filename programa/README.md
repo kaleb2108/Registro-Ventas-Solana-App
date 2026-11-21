@@ -1,10 +1,23 @@
-# Programa de referencia para Playground
+# Registro de Ventas en Solana (Solana Engineering Track - WayLearn)
 
-Copia del programa `registro` de WayLearn, con Registro, Cliente y Venta. La procedencia y revisión están en `docs/ORIGENES.md`.
+Aplicación descentralizada (dApp) desplegada en **Solana Devnet** construida con **Anchor (Rust)**, **Codama** y **React + TypeScript**.
 
-- `src/lib.rs`: programa de referencia sin modificar.
-- `client/client.ts`: cliente de referencia para Solana Playground.
+## Datos del Despliegue y Evidencia en Devnet
 
-Esta carpeta no es un workspace Anchor CLI completo. El `declare_id!("")` de la fuente es el marcador del material de Playground; el proyecto de Playground debe gestionar la dirección real del programa antes de compilar y desplegar.
+- **Autor:** Kaleb Guadalupe Hernández Torres (`@kaleb2108`)
+- **Program ID (Devnet):** `E6aT8XpxPyqKtttRxjhgoVoaGX4icqbzDxbNic9BuwNo`
+- **Explorer del Programa:** https://explorer.solana.com/address/E6aT8XpxPyqKtttRxjhgoVoaGX4icqbzDxbNic9BuwNo?cluster=devnet
+- **Wallet de Autoridad (Phantom Devnet):** `3J936jjVMWdCo36imyytawpCf61PxTMYjeU5txMBooxP`
+- **Transacción de Baja de Cliente (Cierre de PDA en Devnet):** https://explorer.solana.com/tx/2dKZAQjY88UDHRm84c8VZKNZ6umyqgApA4LWjGTtHziJKpB1er5Z9aULPSmoTr1Uj5TRT8ENDNb3WPtKufstkU3?cluster=devnet
 
-Para conectar el frontend, utiliza el IDL exportado del código que realmente desplegaste. Sigue `docs/IDL-Y-PLAYGROUND.md`. Si ya trabajas con el programa en el repositorio canónico o en Playground, no necesitas reemplazarlo por esta copia.
+## Mejoras de Lógica de Negocio Implementadas
+
+1. **Baja de Cliente con Cierre de Cuenta PDA (`dar_baja_cliente`):**
+   - Permite dar de baja a un cliente existente y cerrar su cuenta PDA (`close = owner`), recuperando el *rent* hacia la autoridad del negocio.
+   - Valida estrictamente que el cliente no tenga ventas activas (`cliente.compras == 0`); de lo contrario, rechaza la transacción con el error personalizado `ClienteConVentasActivas` (`6002`).
+2. **Validaciones de Integridad en el Contrato (`lib.rs`):**
+   - **Montos mayores a cero (`MontoInvalido` - `6003`):** Impide registrar ventas o actualizar importes con valor `0`.
+   - **Prevención de actualizaciones redundantes (`MontoSinCambios` - `6004`):** Rechaza modificaciones cuando el nuevo importe es idéntico al monto actual.
+   - **Campos de texto obligatorios (`CampoVacio` - `6005`):** Evita crear registros, clientes o ventas con cadenas vacías o solo espacios.
+3. **Integración Completa Frontend + Codama:**
+   - Cliente TypeScript regenerado a partir del IDL desplegado en Devnet y nueva pestaña **Baja cliente** integrada en `src/components/Registro.tsx`.
